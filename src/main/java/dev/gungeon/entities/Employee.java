@@ -1,9 +1,9 @@
 package dev.gungeon.entities;
 
 public class Employee {
-    int id;
-    String firstName;
-    String lastName;
+    private int id;
+    private String firstName;
+    private String lastName;
 
     public Employee(String f, String l) {
         firstName = f;

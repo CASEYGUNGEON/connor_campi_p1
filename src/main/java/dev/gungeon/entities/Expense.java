@@ -1,11 +1,11 @@
 package dev.gungeon.entities;
 
 public class Expense {
-    int id;
-    int empID;
-    double amount;
+    private int id;
+    private int empID;
+    private double amount;
     //-1 pending, 0 denied, 1 approved
-    int status;
+    private int status;
 
     public Expense(int emp, double amt) {
         empID = emp;
