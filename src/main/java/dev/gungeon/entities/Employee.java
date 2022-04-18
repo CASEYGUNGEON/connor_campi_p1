@@ -1,6 +1,6 @@
 package dev.gungeon.entities;
 
-public class Employee implements EmployeeInterface {
+public class Employee {
     int id;
     String firstName;
     String lastName;

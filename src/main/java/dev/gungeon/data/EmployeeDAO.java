@@ -1,14 +1,17 @@
 package dev.gungeon.data;
 
-import dev.gungeon.entities.EmployeeInterface;
+import dev.gungeon.entities.Employee;
+import dev.gungeon.entities.Expense;
+
+import java.util.List;
 
 public interface EmployeeDAO {
 
-    EmployeeInterface CreateEmployee(EmployeeInterface employee);
+    Employee CreateEmployee(Employee employee);
 
-    EmployeeInterface GetEmployee(int id);
+    Employee GetEmployee(int id);
 
     boolean DeleteEmployee(int id);
 
-    EmployeeInterface[] GetAllEmployees();
+    List<Employee> GetAllEmployees();
 }

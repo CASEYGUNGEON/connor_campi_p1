@@ -1,20 +1,22 @@
 package dev.gungeon.data;
 
-import dev.gungeon.entities.ExpenseInterface;
+import dev.gungeon.entities.Expense;
+
+import java.util.List;
 
 public interface ExpenseDAO {
 
-    ExpenseInterface CreateExpense(ExpenseInterface expense);
+    Expense CreateExpense(Expense expense);
 
-    ExpenseInterface GetExpense(int id);
+    Expense GetExpense(int id);
 
-    boolean PutExpense(ExpenseInterface expense);
+    boolean PutExpense(Expense expense);
 
     boolean RespondExpense(int id, boolean approved);
 
     boolean DeleteExpense(int id);
 
-    ExpenseInterface[] GetAllExpenses();
+    List<Expense> GetAllExpenses();
 
-    ExpenseInterface[] GetExpensesByEmployee(int empID);
+    List<Expense> GetExpensesByEmployee(int empID);
 }
