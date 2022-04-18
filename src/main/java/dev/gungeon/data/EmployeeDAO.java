@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface EmployeeDAO {
 
-    Employee CreateEmployee(Employee employee);
+    Employee createEmployee(Employee employee);
 
-    Employee GetEmployee(int id);
+    Employee getEmployee(int id);
 
-    boolean DeleteEmployee(int id);
+    boolean deleteEmployee(int id);
 
-    List<Employee> GetAllEmployees();
+    List<Employee> getAllEmployees();
 }
