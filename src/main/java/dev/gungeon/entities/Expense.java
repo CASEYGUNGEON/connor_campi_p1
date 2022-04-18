@@ -26,4 +26,36 @@ public class Expense {
         amount = amt;
         status = sta;
     }
+
+    public void setId(int i) {
+        id = i;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setEmployee(int i) {
+        empID = i;
+    }
+
+    public int getEmployee() {
+        return empID;
+    }
+
+    public void setAmount(double amt) {
+        amount = amt;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setStatus(int sta) {
+        status = sta;
+    }
+
+    public int getStatus() {
+        return status;
+    }
 }

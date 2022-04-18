@@ -15,4 +15,28 @@ public class Employee {
         firstName = f;
         lastName = l;
     }
+
+    public void setId(int i) {
+        id = i;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setFirstName(String name) {
+        firstName = name;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setLastName(String name) {
+        lastName = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
 }
