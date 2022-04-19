@@ -9,6 +9,8 @@ public interface EmployeeDAO {
 
     Employee createEmployee(Employee employee);
 
+    Employee updateEmployee(Employee employee);
+
     Employee getEmployee(int id);
 
     boolean deleteEmployee(int id);

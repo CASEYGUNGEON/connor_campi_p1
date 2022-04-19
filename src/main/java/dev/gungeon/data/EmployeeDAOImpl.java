@@ -33,6 +33,26 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     }
 
     @Override
+    public Employee updateEmployee(Employee employee) {
+        try {
+            Connection conn = ConnectionUtil.createConnection();
+            String sql = "update employees set id = ?, firstname = ?, lastname = ?";
+            assert conn != null;
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1,employee.getId());
+            ps.setString(2, employee.getFirstName());
+            ps.setString(3, employee.getLastName());
+
+            ps.executeUpdate();
+            return employee;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public Employee getEmployee(int id) {
         try {
             Connection conn = ConnectionUtil.createConnection();
@@ -41,10 +61,11 @@ public class EmployeeDAOImpl implements EmployeeDAO {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1,id);
 
-            ps.execute();
+            ps.executeUpdate();
 
             ResultSet rs = ps.getGeneratedKeys();
-            rs.next();
+            if(!rs.next())
+                return null;
             return new Employee(rs.getInt("id"),rs.getString("firstname"),rs.getString("lastname"));
 
         }
@@ -58,9 +79,13 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     public boolean deleteEmployee(int id) {
         try {
             Connection conn = ConnectionUtil.createConnection();
-            String sql = "delete from employees where id = ?";
+            String sql = "update expenses set emp_id = ? where emp_id = ?";
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setNull(1,java.sql.Types.NULL);
+            ps.setInt(2,id);
+            sql = "delete from employees where id = ?";
+            ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
             ps.execute();
             return true;
