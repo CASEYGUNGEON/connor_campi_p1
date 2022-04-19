@@ -2,7 +2,7 @@ package dev.gungeon.data;
 
 import dev.gungeon.entities.Expense;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public interface ExpenseDAO {
 
@@ -16,7 +16,7 @@ public interface ExpenseDAO {
 
     boolean deleteExpense(int id);
 
-    List<Expense> getAllExpenses();
+    ArrayList<Expense> getAllExpenses();
 
-    List<Expense> getExpensesByEmployee(int empID);
+    ArrayList<Expense> getExpensesByEmployee(int empID);
 }
