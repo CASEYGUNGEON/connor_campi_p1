@@ -2,6 +2,8 @@ package dev.gungeon.app;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.gungeon.data.EmployeeDAOImpl;
 import dev.gungeon.entities.Employee;
 import io.javalin.Javalin;
@@ -54,15 +56,22 @@ public class App {
         });
 
         app.post("/employees", context -> {
-            Employee e = gson.fromJson(context.body(), Employee.class);
-            empdao.createEmployee(e);
-            context.result("Employee record successfully added.");
-            context.status(201);
+            Employee e = gson.<Employee>fromJson(context.body(), Employee.class);
+            if(e!=null) {
+                empdao.createEmployee(e);
+                context.result("Employee record successfully added.");
+                context.status(201);
+            }
+            else {
+                context.result("Failed.\n" + context.body());
+                context.status(500);
+            }
         });
 
         app.put("/employees/{num}", context -> {
             int id = Integer.parseInt(context.pathParam("num"));
-            Employee e = context.bodyAsClass(Employee.class);
+            Employee e = gson.<Employee>fromJson(context.body(), Employee.class);
+            e.setId(id);
             e = empdao.updateEmployee(e);
 
             if(e == null) {

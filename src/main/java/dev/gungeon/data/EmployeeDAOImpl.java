@@ -36,12 +36,12 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     public Employee updateEmployee(Employee employee) {
         try {
             Connection conn = ConnectionUtil.createConnection();
-            String sql = "update employees set id = ?, firstname = ?, lastname = ?";
+            String sql = "update employees set firstname = ?, lastname = ? where id = ?";
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,employee.getId());
-            ps.setString(2, employee.getFirstName());
-            ps.setString(3, employee.getLastName());
+            ps.setString(1, employee.getFirstName());
+            ps.setString(2, employee.getLastName());
+            ps.setInt(3,employee.getId());
 
             ps.executeUpdate();
             return employee;
@@ -61,9 +61,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1,id);
 
-            ps.executeUpdate();
-
-            ResultSet rs = ps.getGeneratedKeys();
+            ResultSet rs = ps.executeQuery();
             if(!rs.next())
                 return null;
             return new Employee(rs.getInt("id"),rs.getString("firstname"),rs.getString("lastname"));
