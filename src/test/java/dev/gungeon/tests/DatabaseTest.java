@@ -12,7 +12,7 @@ public class DatabaseTest {
         EmployeeDAO empdao = new EmployeeDAOImpl();
         Employee e = empdao.createEmployee(new Employee("Machine","Girl"));
         Assertions.assertNotEquals(0, e.getId());
-        empdao.deleteEmployee(e);
+        //empdao.deleteEmployee(e);
     }
 
     @Test

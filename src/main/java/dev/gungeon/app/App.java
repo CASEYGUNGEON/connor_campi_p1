@@ -54,7 +54,7 @@ public class App {
         });
 
         app.post("/employees", context -> {
-            Employee e = context.bodyAsClass(Employee.class);
+            Employee e = gson.fromJson(context.body(), Employee.class);
             empdao.createEmployee(e);
             context.result("Employee record successfully added.");
             context.status(201);

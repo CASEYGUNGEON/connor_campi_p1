@@ -12,7 +12,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     public Employee createEmployee(Employee employee) {
         try {
             Connection conn = ConnectionUtil.createConnection();
-            String sql = "insert into employees values (default,?,?)";
+            String sql = "insert into employees values(default,?,?)";
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, employee.getFirstName());
@@ -78,6 +78,8 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     @Override
     public boolean deleteEmployee(int id) {
         try {
+            if(getEmployee(id) == null)
+                return false;
             Connection conn = ConnectionUtil.createConnection();
             String sql = "update expenses set emp_id = ? where emp_id = ?";
             assert conn != null;
