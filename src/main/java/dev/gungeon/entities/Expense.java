@@ -58,4 +58,21 @@ public class Expense {
     public int getStatus() {
         return status;
     }
+
+    @Override
+    public String toString() {
+        String out = this.id + ": Employee: " + this.empID + ", $" + String.format("%.2f",this.amount) + ", ";
+        switch(this.status) {
+            case 1: {
+                out += "Approved";
+            } break;
+            case 0: {
+                out += "Denied";
+            } break;
+            default: {
+                out += "Pending";
+            }
+        }
+        return out;
+    }
 }

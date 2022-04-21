@@ -85,7 +85,32 @@ public class App {
         });
 
 
+        //Expenses
 
+        app.post("/expenses", context -> {
+
+        });
+
+        app.get("/expenses", context -> {
+
+        });
+
+        app.get("/expenses/{num}", context -> {
+            int id = Integer.parseInt(context.pathParam("num"));
+
+        });
+
+        app.put("/expenses/{num}", context -> {
+
+        });
+
+        app.patch("/expenses/{num}/{status}", context -> {
+
+        });
+
+        app.delete("/expenses/{num}", context -> {
+
+        });
 
         app.start(7000);
     }

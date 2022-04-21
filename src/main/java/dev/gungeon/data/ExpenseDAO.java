@@ -1,6 +1,7 @@
 package dev.gungeon.data;
 
 import dev.gungeon.entities.Expense;
+import dev.gungeon.utilities.exceptions.ConfirmedExpenseException;
 
 import java.util.ArrayList;
 
@@ -10,11 +11,11 @@ public interface ExpenseDAO {
 
     Expense getExpense(int id);
 
-    boolean putExpense(Expense expense);
+    boolean putExpense(Expense expense) throws ConfirmedExpenseException;
 
-    boolean respondExpense(int id, boolean approved);
+    boolean respondExpense(Expense expense, boolean approved);
 
-    boolean deleteExpense(int id);
+    boolean deleteExpense(Expense Expense) throws ConfirmedExpenseException;
 
     ArrayList<Expense> getAllExpenses();
 
