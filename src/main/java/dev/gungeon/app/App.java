@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.gungeon.data.EmployeeDAOImpl;
+import dev.gungeon.data.ExpenseDAOImpl;
 import dev.gungeon.entities.Employee;
+import dev.gungeon.entities.Expense;
 import io.javalin.Javalin;
 import io.javalin.http.Handler;
 
@@ -16,6 +18,7 @@ public class App {
 
         Javalin app = Javalin.create();
         EmployeeDAOImpl empdao = new EmployeeDAOImpl();
+        ExpenseDAOImpl expdao = new ExpenseDAOImpl();
         Gson gson = new GsonBuilder().create();
 
         app.delete("/employees/{num}", context -> {
@@ -88,20 +91,59 @@ public class App {
         //Expenses
 
         app.post("/expenses", context -> {
-
+            Expense e = gson.<Expense>fromJson(context.body(), Expense.class);
+            if(e != null) {
+                e = expdao.createExpense(e);
+                context.result("Expense report added.");
+                context.status(201);
+            }
+            else {
+                context.result("Failed.\n" + context.body());
+                context.status(500);
+            }
         });
 
         app.get("/expenses", context -> {
-
+            ArrayList<Expense> list = expdao.getAllExpenses();
+            StringBuilder out = new StringBuilder("Expenses:\n");
+            for (Expense e : list) {
+                out.append(e.toString());
+                out.append("\n");
+            }
+            context.status(200);
+            context.result(String.valueOf(out));
         });
 
         app.get("/expenses/{num}", context -> {
+            String q = context.queryParam("status");
             int id = Integer.parseInt(context.pathParam("num"));
-
+            Expense e = expdao.getExpense(id);
+            if(q != null) {
+                context.result("False");
+                context.status(200);
+                switch(e.getStatus()) {
+                    case 1: {
+                        if(q == "approved")
+                            context.result("True");
+                    } break;
+                    case 0: {
+                        if(q == "denied")
+                            context.result("True");
+                    } break;
+                    default: {
+                        if(q == "pending")
+                            context.result("True");
+                    } break;
+                }
+            }
+            else {
+                context.result(e.toString());
+                context.status(200);
+            }
         });
 
         app.put("/expenses/{num}", context -> {
-
+            
         });
 
         app.patch("/expenses/{num}/{status}", context -> {
