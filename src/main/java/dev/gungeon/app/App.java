@@ -8,6 +8,8 @@ import dev.gungeon.data.EmployeeDAOImpl;
 import dev.gungeon.data.ExpenseDAOImpl;
 import dev.gungeon.entities.Employee;
 import dev.gungeon.entities.Expense;
+import dev.gungeon.utilities.LogLevel;
+import dev.gungeon.utilities.Logger;
 import dev.gungeon.utilities.exceptions.ConfirmedExpenseException;
 import io.javalin.Javalin;
 import io.javalin.http.Handler;
@@ -17,6 +19,7 @@ import java.util.NoSuchElementException;
 
 public class App {
     public static void main(String[] args) {
+        Logger.log("Application started.",LogLevel.INFO);
 
         Javalin app = Javalin.create();
         EmployeeDAOImpl empdao = new EmployeeDAOImpl();
@@ -25,6 +28,7 @@ public class App {
 
         app.delete("/employees/{num}", context -> {
             int id = Integer.parseInt(context.pathParam("num"));
+            Logger.log("Attempt to delete employee: " + id,LogLevel.WARNING);
             boolean success = empdao.deleteEmployee(id);
             if(success) {
                 context.result("Employee " + id + " deleted.");
@@ -69,7 +73,7 @@ public class App {
             }
             else {
                 context.result("Failed.\n" + context.body());
-                context.status(500);
+                context.status(400);
             }
         });
 
@@ -95,8 +99,14 @@ public class App {
         app.post("/expenses", context -> {
             Expense e = gson.<Expense>fromJson(context.body(), Expense.class);
             if(e != null) {
+                if(e.getAmount() < 0) {
+                    Logger.log("Illegal: negative expense amount",LogLevel.WARNING);
+                    context.result("Amount must be positive.");
+                    context.status(400);
+                }
                 e = expdao.createExpense(e);
                 if(e != null) {
+                    Logger.log("Expense added.",LogLevel.INFO);
                     context.result("Expense report added.");
                     context.status(201);
                     return;
@@ -122,6 +132,7 @@ public class App {
             int id = Integer.parseInt(context.pathParam("num"));
             Expense e = expdao.getExpense(id);
             if(q != null) {
+                Logger.log("Confirming expense " + id,LogLevel.INFO);
                 context.result("False");
                 context.status(200);
                 switch(e.getStatus()) {
@@ -171,7 +182,7 @@ public class App {
             }
             catch (ConfirmedExpenseException e) {
                 context.result("Cannot modify expense.");
-                context.status(500);
+                context.status(405);
             }
             catch(NoSuchElementException e) {
                 context.result("Expense not found.");
@@ -193,22 +204,24 @@ public class App {
                     context.status(200);
                 } catch (ConfirmedExpenseException e) {
                     context.result("Expense not pending.");
-                    context.status(500);
+                    context.status(405);
                 }
             }
             else {
                 context.result("Not legal status.");
-                context.status(500);
+                context.status(400);
             }
         });
 
         app.delete("/expenses/{num}", context -> {
             try {
-                expdao.deleteExpense(Integer.parseInt(context.pathParam("num")));
+                int i = Integer.parseInt(context.pathParam("num"));
+                Logger.log("Attempt to delete expense: " + i,LogLevel.WARNING);
+                expdao.deleteExpense(i);
             }
             catch(ConfirmedExpenseException e) {
                 context.result("Expense already confirmed. Cannot remove.");
-                context.status(500);
+                context.status(405);
             }
             catch(NoSuchElementException e) {
                 context.result("Expense not found.");

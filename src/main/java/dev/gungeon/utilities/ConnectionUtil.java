@@ -9,6 +9,7 @@ public class ConnectionUtil {
     public static Connection createConnection() {
         try {
             Connection conn = DriverManager.getConnection("jdbc:postgresql://expensedb.cvsalbi9eqlo.us-west-1.rds.amazonaws.com/", "postgres", "8eoGX%Jx*srB5k");
+            Logger.log("Connection established.",LogLevel.INFO);
             return conn;
         }
         catch (SQLException e) {
