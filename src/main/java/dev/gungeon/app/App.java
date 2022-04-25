@@ -19,17 +19,19 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 public class App {
-    private boolean PostExpense(ExpenseDAOImpl expdao, Expense e) {
-        if(e != null) {
-            if(e.getAmount() < 0) {
-                Logger.log("Illegal: negative expense amount",LogLevel.WARNING);
+    private static boolean PostExpense(ExpenseDAOImpl expdao, Expense e) {
+        if (e != null) {
+            if (e.getAmount() < 0) {
+                Logger.log("Illegal: negative expense amount", LogLevel.WARNING);
                 return false;
             }
             e = expdao.createExpense(e);
-            if(e != null) {
-                Logger.log("Expense added.",LogLevel.INFO);
+            if (e != null) {
+                Logger.log("Expense added.", LogLevel.INFO);
                 return true;
             }
+        }
+        return false;
     }
 
     public static void main(String[] args) {
@@ -176,7 +178,7 @@ public class App {
            list = expdao.getExpensesByEmployee(num);
            StringBuilder out = new StringBuilder("Expenses:\n");
            for(Expense e : list) {
-               out.append(e.toString() + "\n");
+               out.append(e.toString()).append("\n");
            }
            context.status(200);
            context.result(out.toString());
