@@ -14,7 +14,7 @@ public class Logger {
         String logMessage = level.name() + " " + message + " " + new Date() + "\n";
 
         try {
-            Files.write(Paths.get(System.getProperty("user.dir") + "\\info.log"), logMessage.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            Files.write(Paths.get(System.getProperty("user.dir") + "/info.log"), logMessage.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
         catch (IOException e) {
             e.printStackTrace();
