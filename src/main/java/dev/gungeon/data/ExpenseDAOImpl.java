@@ -7,6 +7,7 @@ import dev.gungeon.utilities.exceptions.ConfirmedExpenseException;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 public class ExpenseDAOImpl implements ExpenseDAO {
 
@@ -67,15 +68,18 @@ public class ExpenseDAOImpl implements ExpenseDAO {
     }
 
     @Override
-    public boolean putExpense(Expense expense) throws ConfirmedExpenseException {
+    public boolean putExpense(Expense expense) throws ConfirmedExpenseException, NoSuchElementException {
         if(expense.getStatus() != -1) {
             throw new ConfirmedExpenseException("Expense Already confirmed.");
+        }
+        if(getExpense(expense.getId()) == null) {
+            throw new NoSuchElementException("Not found.");
         }
         try {
             Connection conn = ConnectionUtil.createConnection();
             String sql = "update expense set emp_id = ?, amount = ?, status = ?, where id = ?";
             assert conn != null;
-            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, expense.getEmployee());
             ps.setDouble(2, expense.getAmount());
             switch(expense.getStatus()) {
@@ -91,11 +95,6 @@ public class ExpenseDAOImpl implements ExpenseDAO {
             }
 
             ps.execute();
-
-            ResultSet rs = ps.getGeneratedKeys();
-            rs.next();
-            int generatedId = rs.getInt("id");
-            expense.setId(generatedId);
             return true;
         }
         catch (SQLException e) {
@@ -105,33 +104,15 @@ public class ExpenseDAOImpl implements ExpenseDAO {
     }
 
     @Override
-    public boolean respondExpense(Expense expense, boolean approved) {
-        try {
-            Connection conn = ConnectionUtil.createConnection();
-            String sql = "update expenses set status = ? where id = ?";
-            assert conn != null;
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setBoolean(1,(expense.getStatus()==1));
-            ps.setInt(2,expense.getId());
-            ps.execute();
-            return true;
-        }
-        catch(SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-    }
-
-    @Override
-    public boolean deleteExpense(Expense expense) throws ConfirmedExpenseException {
-        if(expense.getStatus() != 1) {
+    public boolean respondExpense(Expense expense, boolean approved) throws ConfirmedExpenseException {
+        if(expense.getStatus() == -1) {
             try {
                 Connection conn = ConnectionUtil.createConnection();
-                String sql = "delete from expenses where id = ?";
+                String sql = "update expenses set status = ? where id = ?";
                 assert conn != null;
                 PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setInt(1, expense.getId());
+                ps.setBoolean(1, (expense.getStatus() == 1));
+                ps.setInt(2, expense.getId());
                 ps.execute();
                 return true;
             } catch (SQLException e) {
@@ -139,7 +120,32 @@ public class ExpenseDAOImpl implements ExpenseDAO {
                 return false;
             }
         }
-        throw new ConfirmedExpenseException("Expense already confirmed");
+        throw new ConfirmedExpenseException("Expense already responded to.");
+    }
+
+    @Override
+    public boolean deleteExpense(Expense expense) throws ConfirmedExpenseException {
+        if(getExpense(expense.getId()).getStatus() != 1)
+            throw new ConfirmedExpenseException("Expense already confirmed");
+        if(getExpense(expense.getId()) == null)
+            throw new NoSuchElementException("Expense not found.");
+        try {
+            Connection conn = ConnectionUtil.createConnection();
+            String sql = "delete from expenses where id = ?";
+            assert conn != null;
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, expense.getId());
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteExpense(int id) throws ConfirmedExpenseException {
+        Expense ex = new Expense(id);
+        return deleteExpense(ex);
     }
 
     @Override

@@ -8,10 +8,12 @@ import dev.gungeon.data.EmployeeDAOImpl;
 import dev.gungeon.data.ExpenseDAOImpl;
 import dev.gungeon.entities.Employee;
 import dev.gungeon.entities.Expense;
+import dev.gungeon.utilities.exceptions.ConfirmedExpenseException;
 import io.javalin.Javalin;
 import io.javalin.http.Handler;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 public class App {
     public static void main(String[] args) {
@@ -94,13 +96,14 @@ public class App {
             Expense e = gson.<Expense>fromJson(context.body(), Expense.class);
             if(e != null) {
                 e = expdao.createExpense(e);
-                context.result("Expense report added.");
-                context.status(201);
+                if(e != null) {
+                    context.result("Expense report added.");
+                    context.status(201);
+                    return;
+                }
             }
-            else {
-                context.result("Failed.\n" + context.body());
-                context.status(500);
-            }
+            context.result("Failed.\n" + context.body());
+            context.status(500);
         });
 
         app.get("/expenses", context -> {
@@ -123,35 +126,64 @@ public class App {
                 context.status(200);
                 switch(e.getStatus()) {
                     case 1: {
-                        if(q == "approved")
+                        if(q.equals("approved"))
                             context.result("True");
                     } break;
                     case 0: {
-                        if(q == "denied")
+                        if(q.equals("denied"))
                             context.result("True");
                     } break;
                     default: {
-                        if(q == "pending")
+                        if(q.equals("pending"))
                             context.result("True");
                     } break;
                 }
             }
             else {
-                context.result(e.toString());
-                context.status(200);
+                if(e != null) {
+                    context.result(e.toString());
+                    context.status(200);
+                }
+                else {
+                    context.result("Not found.");
+                    context.status(404);
+                }
             }
         });
 
         app.put("/expenses/{num}", context -> {
-            
+            Expense ex = gson.<Expense>fromJson(context.body(), Expense.class);
+            try {
+                expdao.putExpense(ex);
+            }
+            catch (ConfirmedExpenseException e) {
+                context.result("Cannot modify expense.");
+                context.status(500);
+            }
+            catch(NoSuchElementException e) {
+                context.result("Expense not found.");
+                context.status(404);
+            }
+
         });
 
         app.patch("/expenses/{num}/{status}", context -> {
-
+            int id = Integer.parseInt(context.pathParam("num"));
+            String status = context.pathParam("status");
         });
 
         app.delete("/expenses/{num}", context -> {
-
+            try {
+                expdao.deleteExpense(Integer.parseInt(context.pathParam("num")));
+            }
+            catch(ConfirmedExpenseException e) {
+                context.result("Expense already confirmed. Cannot remove.");
+                context.status(500);
+            }
+            catch(NoSuchElementException e) {
+                context.result("Expense not found.");
+                context.status(404);
+            }
         });
 
         app.start(7000);

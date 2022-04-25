@@ -13,7 +13,7 @@ public interface ExpenseDAO {
 
     boolean putExpense(Expense expense) throws ConfirmedExpenseException;
 
-    boolean respondExpense(Expense expense, boolean approved);
+    boolean respondExpense(Expense expense, boolean approved) throws ConfirmedExpenseException;
 
     boolean deleteExpense(Expense Expense) throws ConfirmedExpenseException;
 

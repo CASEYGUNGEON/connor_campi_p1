@@ -7,6 +7,10 @@ public class Expense {
     //-1 pending, 0 denied, 1 approved
     private int status;
 
+    public Expense(int i) {
+        id = i;
+    }
+
     public Expense(int emp, double amt) {
         empID = emp;
         amount = amt;
