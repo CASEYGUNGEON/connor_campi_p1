@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.gungeon.data.EmployeeDAOImpl;
+import dev.gungeon.data.ExpenseDAO;
 import dev.gungeon.data.ExpenseDAOImpl;
 import dev.gungeon.entities.Employee;
 import dev.gungeon.entities.Expense;
@@ -18,6 +19,19 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 public class App {
+    private boolean PostExpense(ExpenseDAOImpl expdao, Expense e) {
+        if(e != null) {
+            if(e.getAmount() < 0) {
+                Logger.log("Illegal: negative expense amount",LogLevel.WARNING);
+                return false;
+            }
+            e = expdao.createExpense(e);
+            if(e != null) {
+                Logger.log("Expense added.",LogLevel.INFO);
+                return true;
+            }
+    }
+
     public static void main(String[] args) {
         Logger.log("Application started.",LogLevel.INFO);
 
@@ -96,32 +110,26 @@ public class App {
 
         //Expenses
 
+
+
         app.post("/expenses", context -> {
             Expense e = gson.<Expense>fromJson(context.body(), Expense.class);
-            if(e != null) {
-                if(e.getAmount() < 0) {
-                    Logger.log("Illegal: negative expense amount",LogLevel.WARNING);
-                    context.result("Amount must be positive.");
-                    context.status(400);
-                }
-                e = expdao.createExpense(e);
-                if(e != null) {
-                    Logger.log("Expense added.",LogLevel.INFO);
-                    context.result("Expense report added.");
-                    context.status(201);
-                    return;
-                }
+            boolean suc = PostExpense(expdao, e);
+            if(suc) {
+                context.result("Expense report added.");
+                context.status(201);
             }
-            context.result("Failed.\n" + context.body());
-            context.status(500);
+            else {
+                context.result("Amount must be positive.");
+                context.status(400);
+            }
         });
 
         app.get("/expenses", context -> {
             ArrayList<Expense> list = expdao.getAllExpenses();
             StringBuilder out = new StringBuilder("Expenses:\n");
             for (Expense e : list) {
-                out.append(e.toString());
-                out.append("\n");
+                out.append(e.toString() + "\n");
             }
             context.status(200);
             context.result(out.toString());
@@ -166,13 +174,27 @@ public class App {
            ArrayList<Expense> list = new ArrayList<>();
            int num = Integer.parseInt(context.pathParam("num"));
            list = expdao.getExpensesByEmployee(num);
-           StringBuilder out = new StringBuilder("Expenses: ");
+           StringBuilder out = new StringBuilder("Expenses:\n");
            for(Expense e : list) {
-               out.append(e.toString());
+               out.append(e.toString() + "\n");
            }
            context.status(200);
            context.result(out.toString());
 
+        });
+
+        app.post("/employees/{num}/expenses", context -> {
+            Expense e = gson.<Expense>fromJson(context.body(), Expense.class);
+            e.setEmployee(Integer.parseInt(context.pathParam("num")));
+            boolean suc = PostExpense(expdao, e);
+            if(suc) {
+                context.result("Expense report added.");
+                context.status(201);
+            }
+            else {
+                context.result("Amount must be positive.");
+                context.status(400);
+            }
         });
 
         app.put("/expenses/{num}", context -> {
