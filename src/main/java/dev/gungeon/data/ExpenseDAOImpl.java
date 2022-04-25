@@ -5,6 +5,7 @@ import dev.gungeon.entities.Expense;
 import dev.gungeon.utilities.ConnectionUtil;
 import dev.gungeon.utilities.exceptions.ConfirmedExpenseException;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -19,7 +20,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, expense.getEmployee());
-            ps.setDouble(2, expense.getAmount());
+            ps.setBigDecimal(2, new BigDecimal(expense.getAmount()));
             switch(expense.getStatus()) {
                 case 1: {
                     ps.setBoolean(3, true);
@@ -28,7 +29,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
                     ps.setBoolean(3, false);
                 }    break;
                 default: {
-                    ps.setNull(3, java.sql.Types.NULL);
+                    ps.setNull(3, Types.BOOLEAN);
                 }    break;
             }
 
@@ -50,7 +51,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
     public Expense getExpense(int id) {
         try {
             Connection conn = ConnectionUtil.createConnection();
-            String sql = "select * from employees where id = ?";
+            String sql = "select * from expenses where id = ?";
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1,id);
@@ -58,7 +59,10 @@ public class ExpenseDAOImpl implements ExpenseDAO {
             ResultSet rs = ps.executeQuery();
             if(!rs.next())
                 return null;
-            return new Expense(rs.getInt("id"),rs.getInt("emp_id"),rs.getDouble("amount"));
+            int s = rs.getBoolean("approved") ? 0 : 1;
+            if(rs.wasNull())
+                s = -1;
+            return new Expense(rs.getInt("id"),rs.getInt("emp_id"),rs.getDouble("amount"), s);
 
         }
         catch (SQLException e) {
@@ -77,7 +81,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
         }
         try {
             Connection conn = ConnectionUtil.createConnection();
-            String sql = "update expense set emp_id = ?, amount = ?, status = ?, where id = ?";
+            String sql = "update expense set emp_id = ?, amount = ?, approved = ?, where id = ?";
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, expense.getEmployee());
@@ -90,7 +94,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
                     ps.setBoolean(3, false);
                 }    break;
                 default: {
-                    ps.setNull(3, java.sql.Types.NULL);
+                    ps.setNull(3, Types.BOOLEAN);
                 }    break;
             }
 
@@ -105,22 +109,25 @@ public class ExpenseDAOImpl implements ExpenseDAO {
 
     @Override
     public boolean respondExpense(Expense expense, boolean approved) throws ConfirmedExpenseException {
-        if(expense.getStatus() == -1) {
-            try {
-                Connection conn = ConnectionUtil.createConnection();
-                String sql = "update expenses set status = ? where id = ?";
-                assert conn != null;
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setBoolean(1, (expense.getStatus() == 1));
-                ps.setInt(2, expense.getId());
-                ps.execute();
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
-            }
+        return respondExpense(expense.getId(), approved);
+    }
+
+    public boolean respondExpense(int id, boolean approved) throws ConfirmedExpenseException {
+        if(getExpense(id).getStatus() != -1)
+            throw new ConfirmedExpenseException("Expense already responded to.");
+        try {
+            Connection conn = ConnectionUtil.createConnection();
+            String sql = "update expenses set approved = ? where id = ?";
+            assert conn != null;
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setBoolean(1, approved);
+            ps.setInt(2, id);
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-        throw new ConfirmedExpenseException("Expense already responded to.");
     }
 
     @Override
@@ -158,7 +165,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
 
             ArrayList<Expense> list = new ArrayList<>();
             while(rs.next()) {
-                Expense e = new Expense(rs.getInt("id"),rs.getInt("emp_id"),rs.getDouble("amount"),rs.getBoolean("status") ? 1 : 0);
+                Expense e = new Expense(rs.getInt("id"),rs.getInt("emp_id"),rs.getDouble("amount"),rs.getBoolean("approved") ? 1 : 0);
                 if(rs.wasNull())
                     e.setStatus(-1);
                 list.add(e);
@@ -182,7 +189,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
 
             ArrayList<Expense> list = new ArrayList<>();
             while(rs.next()) {
-                Expense e = new Expense(rs.getInt("id"),empID,rs.getDouble("amount"),rs.getBoolean("status") ? 1 : 0);
+                Expense e = new Expense(rs.getInt("id"),empID,rs.getDouble("amount"),rs.getBoolean("approved") ? 1 : 0);
                 if(rs.wasNull())
                     e.setStatus(-1);
                 list.add(e);

@@ -44,7 +44,7 @@ public class App {
                 out.append("\n");
             }
             context.status(200);
-            context.result(String.valueOf(out));
+            context.result(out.toString());
         });
 
         app.get("/employees/{num}", context -> {
@@ -114,11 +114,11 @@ public class App {
                 out.append("\n");
             }
             context.status(200);
-            context.result(String.valueOf(out));
+            context.result(out.toString());
         });
 
         app.get("/expenses/{num}", context -> {
-            String q = context.queryParam("status");
+            java.lang.String q = context.queryParam("status");
             int id = Integer.parseInt(context.pathParam("num"));
             Expense e = expdao.getExpense(id);
             if(q != null) {
@@ -151,6 +151,19 @@ public class App {
             }
         });
 
+        app.get("/employees/{num}/expenses", context -> {
+           ArrayList<Expense> list = new ArrayList<>();
+           int num = Integer.parseInt(context.pathParam("num"));
+           list = expdao.getExpensesByEmployee(num);
+           StringBuilder out = new StringBuilder("Expenses: ");
+           for(Expense e : list) {
+               out.append(e.toString());
+           }
+           context.status(200);
+           context.result(out.toString());
+
+        });
+
         app.put("/expenses/{num}", context -> {
             Expense ex = gson.<Expense>fromJson(context.body(), Expense.class);
             try {
@@ -170,6 +183,23 @@ public class App {
         app.patch("/expenses/{num}/{status}", context -> {
             int id = Integer.parseInt(context.pathParam("num"));
             String status = context.pathParam("status");
+            if(status.equals("approve") || status.equals("deny")) {
+                boolean bool = true;
+                if (status.equals("deny"))
+                    bool = false;
+                try {
+                    expdao.respondExpense(id, bool);
+                    context.result("Response confirmed.");
+                    context.status(200);
+                } catch (ConfirmedExpenseException e) {
+                    context.result("Expense not pending.");
+                    context.status(500);
+                }
+            }
+            else {
+                context.result("Not legal status.");
+                context.status(500);
+            }
         });
 
         app.delete("/expenses/{num}", context -> {
