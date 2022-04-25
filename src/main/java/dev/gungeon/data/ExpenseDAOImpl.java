@@ -132,7 +132,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
 
     @Override
     public boolean deleteExpense(Expense expense) throws ConfirmedExpenseException {
-        if(getExpense(expense.getId()).getStatus() != 1)
+        if(getExpense(expense.getId()).getStatus() != -1)
             throw new ConfirmedExpenseException("Expense already confirmed");
         if(getExpense(expense.getId()) == null)
             throw new NoSuchElementException("Expense not found.");
