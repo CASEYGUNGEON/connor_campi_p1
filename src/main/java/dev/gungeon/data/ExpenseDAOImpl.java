@@ -81,7 +81,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
         }
         try {
             Connection conn = ConnectionUtil.createConnection();
-            String sql = "update expense set emp_id = ?, amount = ?, approved = ?, where id = ?";
+            String sql = "update expense set emp_id = ?, amount = ?, approved = ? where id = ?";
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, expense.getEmployee());
