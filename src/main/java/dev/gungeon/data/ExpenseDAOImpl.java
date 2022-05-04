@@ -85,7 +85,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
             assert conn != null;
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, expense.getEmployee());
-            ps.setDouble(2, expense.getAmount());
+            ps.setBigDecimal(2, new BigDecimal(expense.getAmount()));
             switch(expense.getStatus()) {
                 case 1: {
                     ps.setBoolean(3, true);
