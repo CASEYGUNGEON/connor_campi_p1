@@ -201,6 +201,7 @@ public class App {
 
         app.put("/expenses/{num}", context -> {
             Expense ex = gson.<Expense>fromJson(context.body(), Expense.class);
+            ex.setId(Integer.parseInt(context.pathParam("num")));
             try {
                 expdao.putExpense(ex);
             }
