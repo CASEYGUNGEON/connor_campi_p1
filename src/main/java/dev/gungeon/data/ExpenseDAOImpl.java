@@ -97,6 +97,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
                     ps.setNull(3, Types.BOOLEAN);
                 }    break;
             }
+            ps.setInt(4,expense.getId());
 
             ps.execute();
             return true;
